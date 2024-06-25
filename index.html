@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <title>資訊二乙 34 劉孟恩 8-2</title>
+    <style>
+        .table {
+            display: flex;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .block {
+            width: 50px;
+            height: 50px;
+        }
+
+        #text {
+            overflow-y: scroll;
+        }
+
+        select,
+        input,
+        button {
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        function load(index, chapter) {
+            if (chapter < 151 && chapter > 0) {
+                $('#text').text('');
+                $.get("file/" + index + "/" + chapter + ".txt", function (data) {
+                    $('#text').text(data);
+                    $('#header').text(index);
+                }, "text");
+                $('#header').text(index);
+                $('#number').text(chapter);
+            } else {
+                $('#chapter').val(1);
+                load(1);
+            }
+        }
+        function l() {
+            setTimeout(function () {
+                $('#text').css("height", (window.innerHeight - parseInt($('#option').css('height').substring(0, 3)) - 132));
+                l();
+            }, 1000)
+        }
+        function p(){
+            $("#row1").html("<th>Background</th>");
+                $("#row2").html("<th>Text</th>");
+            colorlist = ["Black", "LightPink", "Wheat", "LightGoldenRodYellow", "PaleGreen", "Aquamarine", "PaleTurquoise", "LightBlue", "Lavender", "LavenderBlush", "Gainsboro", "White"];
+            colorlist2 = ["Black", "Red", "Orange", "Yellow", "Green", "Turquoise", "DodgerBlue", "Blue", "purple", "Magenta", "Grey", "White"];
+            for (var i = 0; i < colorlist.length; i++) {
+                    $('#row1').html($('#row1').html() + "<th class='block' style='background-color:" + colorlist[i] + "' id='" + i + "'></th>'");
+                    $('#row2').html($('#row2').html() + "<th class='block2' style='background-color:" + colorlist2[i] + "' id='" + i + "'></th>'");
+                }
+        }
+        
+        $(document).ready(function () {
+            p();
+            
+            $.getJSON('data.json', function (data) {
+                data.index.forEach(item => {
+                    $('#index').append("<option value='" + item + "'>" + item + "</option>");
+                });
+                data.font.forEach(item => {
+                    $('#font').append("<option value='" + item + "'>" + item + "</option>");
+                });
+                
+            }
+            
+            );
+            $('.block').click(function () {
+                $('body').css('background-color', $(this).css('background-color').toString());
+            })
+            $('.block2').click(function () {
+                $('body').css('color', $(this).css('background-color').toString());
+            })
+            $('#load').click(function () {
+                load($('#index').val(), $('#chapter').val());
+            })
+            $('#former').click(function () {
+                if ($('#chapter').val() != 1) {
+                    $('#chapter').val(parseInt($('#chapter').val()) - 1);
+                    load($('#index').val(), $('#chapter').val());
+                }
+            })
+            $('#latter').click(function () {
+                $('#chapter').val(parseInt($('#chapter').val()) + 1);
+                load($('#index').val(), $('#chapter').val());
+            })
+            $('#index').change(function () {
+                $('#chapter').val(1);
+            })
+            $('#font').change(function () {
+                $('#text').css("font-size", $('#font').val());
+            })
+
+            load("創世紀", $('#chapter').val());
+            l();
+        })
+    </script>
+</head>
+
+<body>
+    <div class="container-fuild">
+        <div id="option">
+            <table class="table table-bordered table-hover t">
+                <tr id="row1"></tr>
+                <tr id="row2"></tr>
+            </table>
+            <div
+                style="display: flex; align-content: center; align-items: center; justify-content: center; padding-bottom: 24px;">
+                <div><select class="form-control" id="index"></select></div>
+                <div><input type="number" class="form-control" id="chapter" value="1"></div>
+                <div><button type="button" class="btn btn-info" id="load">載入</button></div>
+                <div><button type="button" class="btn btn-danger" id="former">上一章</button></div>
+                <div><button type="button" class="btn btn-success" id="latter">下一章</button></div>
+                <div><select class="form-control" id="font"></select></div>
+            </div>
+        </div>
+        <div>
+            <h5 id="header" style="font-family:Microsoft YaHei; text-align: center;">馬太福音</h5>
+            <h1 id="number" style="font-family: Georgia, serif; text-align: center; font-size: 400%;">1</h1>
+            <h5 id="text" style="font-family: DFKai-SB; line-height: 200%;"></h5>
+        </div>
+    </div>
+</body>
+</html>
