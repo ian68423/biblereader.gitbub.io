@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
-    <title>BibleReader</title>
+    <title>資訊二乙 34 劉孟恩 8-2</title>
     <style>
         .table {
             display: flex;
@@ -37,50 +37,60 @@
 
     <script>
         function load(index, chapter) {
-            if (chapter < 151 && chapter > 0) {
-                $('#text').text('');
-                $.get("file/" + index + "/" + chapter + ".txt", function (data) {
-                    $('#text').text(data);
-                    $('#header').text(index);
-                }, "text");
+            $('#text').text('');
+            $.get("file/" + index + "/" + chapter + ".txt", function (data) {
+                $('#text').text(data);
                 $('#header').text(index);
-                $('#number').text(chapter);
-            } else {
-                $('#chapter').val(1);
-                load(1);
-            }
+            }, "text");
+            $('#header').text(index);
+            $('#number').text(chapter);
         }
-        function l() {
+        function adjustsize() {
             setTimeout(function () {
                 $('#text').css("height", (window.innerHeight - parseInt($('#option').css('height').substring(0, 3)) - 132));
-                l();
+                adjustsize();
             }, 1000)
         }
-        function p(){
+        function initial() {
+            var dictionary = {};
             $("#row1").html("<th>Background</th>");
-                $("#row2").html("<th>Text</th>");
+            $("#row2").html("<th>Text</th>");
             colorlist = ["Black", "LightPink", "Wheat", "LightGoldenRodYellow", "PaleGreen", "Aquamarine", "PaleTurquoise", "LightBlue", "Lavender", "LavenderBlush", "Gainsboro", "White"];
             colorlist2 = ["Black", "Red", "Orange", "Yellow", "Green", "Turquoise", "DodgerBlue", "Blue", "purple", "Magenta", "Grey", "White"];
             for (var i = 0; i < colorlist.length; i++) {
-                    $('#row1').html($('#row1').html() + "<th class='block' style='background-color:" + colorlist[i] + "' id='" + i + "'></th>'");
-                    $('#row2').html($('#row2').html() + "<th class='block2' style='background-color:" + colorlist2[i] + "' id='" + i + "'></th>'");
-                }
-        }
-        
-        $(document).ready(function () {
-            p();
-            
+                $('#row1').html($('#row1').html() + "<th class='block' style='background-color:" + colorlist[i] + "' id='" + i + "'></th>'");
+                $('#row2').html($('#row2').html() + "<th class='block2' style='background-color:" + colorlist2[i] + "' id='" + i + "'></th>'");
+            }
+
             $.getJSON('data.json', function (data) {
+                var arrayA = [];
+                var arrayB = [];
                 data.index.forEach(item => {
                     $('#index').append("<option value='" + item + "'>" + item + "</option>");
+                    arrayA.push(item);
                 });
                 data.font.forEach(item => {
                     $('#font').append("<option value='" + item + "'>" + item + "</option>");
                 });
-                
-            }
-            
-            );
+                data.chapter.forEach(item => {
+                    arrayB.push(item);
+                });
+                $.map(arrayA, function (value, key) {
+                    dictionary[value] = arrayB[key];
+                })
+                $('#chapter').html("");
+                for (var i = 1; i < parseInt(dictionary[$('#index').val()]) + 1; i++) {
+                    $('#chapter').append("<option value='" + i + "'>" + i + "</option>");
+                }
+            });
+            $('#index').val('創世紀');
+            $('#chapter').val(1);
+            return (dictionary);
+        }
+        $(document).ready(function () {
+            var dictionary = {};
+            dictionary = initial();
+
             $('.block').click(function () {
                 $('body').css('background-color', $(this).css('background-color').toString());
             })
@@ -93,22 +103,32 @@
             $('#former').click(function () {
                 if ($('#chapter').val() != 1) {
                     $('#chapter').val(parseInt($('#chapter').val()) - 1);
-                    load($('#index').val(), $('#chapter').val());
+                }else{
+                    $('#chapter').val(parseInt(dictionary[$('#index').val()]));
                 }
+                load($('#index').val(), $('#chapter').val());
             })
             $('#latter').click(function () {
-                $('#chapter').val(parseInt($('#chapter').val()) + 1);
+                if ($('#chapter').val() == parseInt(dictionary[$('#index').val()])) {
+                    $('#chapter').val(1);
+                } else {
+                    $('#chapter').val(parseInt($('#chapter').val()) + 1);
+                }
                 load($('#index').val(), $('#chapter').val());
             })
             $('#index').change(function () {
                 $('#chapter').val(1);
+                $('#chapter').html("");
+                for (var i = 1; i < parseInt(dictionary[$('#index').val()]) + 1; i++) {
+                    $('#chapter').append("<option value='" + i + "'>" + i + "</option>");
+                }
             })
             $('#font').change(function () {
                 $('#text').css("font-size", $('#font').val());
             })
 
-            load("創世紀", $('#chapter').val());
-            l();
+            load($('#index').val(), $('#chapter').val());
+            adjustsize();
         })
     </script>
 </head>
@@ -123,7 +143,7 @@
             <div
                 style="display: flex; align-content: center; align-items: center; justify-content: center; padding-bottom: 24px;">
                 <div><select class="form-control" id="index"></select></div>
-                <div><input type="number" class="form-control" id="chapter" value="1"></div>
+                <div><select class="form-control" id="chapter"></select></div>
                 <div><button type="button" class="btn btn-info" id="load">載入</button></div>
                 <div><button type="button" class="btn btn-danger" id="former">上一章</button></div>
                 <div><button type="button" class="btn btn-success" id="latter">下一章</button></div>
@@ -131,10 +151,9 @@
             </div>
         </div>
         <div>
-            <h5 id="header" style="font-family:Microsoft YaHei; text-align: center;">馬太福音</h5>
-            <h1 id="number" style="font-family: Georgia, serif; text-align: center; font-size: 400%;">1</h1>
+            <h5 id="header" style="font-family:Microsoft YaHei; text-align: center;"></h5>
+            <h1 id="number" style="font-family: Georgia, serif; text-align: center; font-size: 400%;"></h1>
             <h5 id="text" style="font-family: DFKai-SB; line-height: 200%;"></h5>
         </div>
     </div>
 </body>
-</html>
